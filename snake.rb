@@ -3,32 +3,22 @@ require 'ruby2d'
 set background: "black", title: "Snake Game"
 set fps_cap: 10
 
-GRID_SIZE =  20
-GRID_WITH = Window.width / GRID_SIZE
+GRID_SIZE = 20
+GRID_WIDTH = Window.width / GRID_SIZE
 GRID_HEIGHT = Window.height / GRID_SIZE
 
 class Snake
   attr_writer :direction
 
   def initialize
-    @positions = [
-      [2, 0],
-      [2, 1],
-      [2, 2],
-      [2, 3]
-    ]
+    @positions = [[2, 0], [2, 1], [2, 2], [2, 3]]
     @direction = "down"
     @growing = false
   end
 
   def draw
     @positions.each do |position|
-      Square.new(
-        x: position[0] * GRID_SIZE,
-        y: position[1] * GRID_SIZE,
-        size: GRID_SIZE - 1,
-        color: "white"
-      )
+      Square.new(x: position[0] * GRID_SIZE, y: position[1] * GRID_SIZE, size: GRID_SIZE - 1, color: "white")
     end
   end
 
@@ -38,13 +28,13 @@ class Snake
     end
 
     case @direction
-    when 'down'
+    when "down"
       @positions.push(new_coordinates(head[0], head[1] + 1))
-    when 'up'
+    when "up"
       @positions.push(new_coordinates(head[0], head[1] - 1))
-    when 'left'
+    when "left"
       @positions.push(new_coordinates(head[0] - 1, head[1]))
-    when ' right'
+    when "right"
       @positions.push(new_coordinates(head[0] + 1, head[1]))
     end
     @growing = false
@@ -52,10 +42,10 @@ class Snake
 
   def can_change_direction_to?(new_direction)
     case @direction
-    when 'up' then new_direction != "down"
-    when 'down' then new_direction != "up"
-    when 'left' then new_direction != "right"
-    when 'right' then new_direction != "left"
+    when "up" then new_direction != "down"
+    when "down" then new_direction != "up"
+    when "left" then new_direction != "right"
+    when "right" then new_direction != "left"
     end
   end
 
@@ -75,6 +65,12 @@ class Snake
     @positions.uniq.length != @positions.length
   end
 
+  private
+
+  def new_coordinates(x, y)
+    [x % GRID_WIDTH, y % GRID_HEIGHT]
+  end
+
   def head
     @positions.last
   end
@@ -83,41 +79,33 @@ end
 class Game
   def initialize
     @score = 0
-    rand_ball()
-    @finished = false
-  end
-
-  def rand_ball
-    @ball_x = rand(GRID_WITH)
+    @ball_x = rand(GRID_WIDTH)
     @ball_y = rand(GRID_HEIGHT)
+    @finished = false
   end
 
   def draw
     unless finished?
-      Square.new(
-        x: @ball_x * GRID_SIZE,
-        y: @ball_y * GRID_SIZE,
-        size: GRID_SIZE,
-        color: 'blue'
-      )
+      Square.new(x: @ball_x * GRID_SIZE, y: @ball_y * GRID_SIZE, size: GRID_SIZE, color: "red")
     end
-    Text.new(text_message, color: 'black', x: 5, y: 5, size: 15)
+    Text.new(text_message, color: "blue", x: 10, y: 10, size: 15)
   end
 
   def snake_hit_ball?(x, y)
-    @ball_x == x && @ball_y = y
+    @ball_x == x && @ball_y == y
   end
 
   def record_hit
     @score += 1
-    rand_ball()
+    @ball_x = rand(GRID_WIDTH)
+    @ball_y = rand(GRID_HEIGHT)
   end
 
   def finish
     @finished = true
   end
 
-  def finished
+  def finished?
     @finished
   end
 
@@ -125,7 +113,7 @@ class Game
 
   def text_message
     if finished?
-      "Game Over! Score: #{@score}. Hit 'R' To Reset Game."
+      "Game Over, your score was : #{@score}. Press R to continue"
     else
       "Score: #{@score}"
     end
@@ -133,12 +121,12 @@ class Game
 end
 
 snake = Snake.new
-game= Game.new
+game = Game.new
 
 update do
   clear
   unless game.finished?
-    snake.movex
+    snake.move
   end
 
   snake.draw
@@ -154,12 +142,12 @@ update do
   end
 end
 
-on :key_down do |e|
-  if ['up', 'down', 'left', 'right'].include?(e.key)
+on :key_down do |event|
+  if ['up', 'down', 'left', 'right'].include?(event.key)
     if snake.can_change_direction_to?(event.key)
       snake.direction = event.key
     end
-  elsif e.key == 'r'
+  elsif event.key == 'r'
     snake = Snake.new
     game = Game.new
   end
