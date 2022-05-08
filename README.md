@@ -1,4 +1,4 @@
-# I Make a Snake-Game in Ruby
+# A Simple Snake-Game in Ruby
 
 ### Dependencies  
 ```bash
